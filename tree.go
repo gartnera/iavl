@@ -211,6 +211,9 @@ func (tree *Tree) computeHash() []byte {
 	if tree.root == nil {
 		return sha256.New().Sum(nil)
 	}
+	if tree.root.hash != nil {
+		return tree.root.hash
+	}
 	tree.deepHash(tree.root, 0)
 	return tree.root.hash
 }
@@ -416,7 +419,6 @@ func (tree *Tree) recursiveSet(node *Node, key []byte, value []byte) (
 			}
 			return node, true, nil
 		}
-
 	} else {
 		tree.addOrphan(node)
 		tree.mutateNode(node)
@@ -668,10 +670,7 @@ func (tree *Tree) Close() error {
 }
 
 func (tree *Tree) Hash() []byte {
-	if tree.root == nil {
-		return emptyHash
-	}
-	return tree.root.hash
+	return tree.computeHash()
 }
 
 func (tree *Tree) Version() int64 {
