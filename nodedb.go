@@ -5,7 +5,9 @@ import (
 	"crypto/sha256"
 	"errors"
 	"fmt"
+	"log"
 	"math"
+	"os"
 	"sort"
 	"strconv"
 	"strings"
@@ -67,6 +69,7 @@ var (
 
 	// Root nodes are indexed separately by their version
 	rootKeyFormat = keyformat.NewKeyFormat('r', int64Size) // r<version>
+	dLogger       = log.New(os.Stderr, "iavl-debug | ", log.Lshortfile)
 )
 
 var errInvalidFastStorageVersion = fmt.Sprintf("Fast storage version must be in the format <storage version>%s<latest fast cache version>", fastStorageVersionDelimiter)
@@ -268,6 +271,7 @@ func (ndb *nodeDB) getStorageVersion() string {
 
 // Returns true if the upgrade to latest storage version has been performed, false otherwise.
 func (ndb *nodeDB) hasUpgradedToFastStorage() bool {
+	dLogger.Printf("hasUpgradeToFastStorage %v >= %v %v", ndb.getStorageVersion(), fastStorageVersionValue, ndb.getStorageVersion() >= fastStorageVersionValue)
 	return ndb.getStorageVersion() >= fastStorageVersionValue
 }
 
@@ -285,6 +289,7 @@ func (ndb *nodeDB) shouldForceFastStorageUpgrade() (bool, error) {
 			return false, err
 		}
 		if versions[1] != strconv.Itoa(int(latestVersion)) {
+			dLogger.Printf("version %v != latestVersion %v", versions[1], strconv.Itoa(int(latestVersion)))
 			return true, nil
 		}
 	}

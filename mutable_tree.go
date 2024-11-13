@@ -558,6 +558,7 @@ func (tree *MutableTree) LoadVersion(targetVersion int64) (int64, error) {
 			if !tree.skipFastStorageUpgrade {
 				tree.mtx.Lock()
 				defer tree.mtx.Unlock()
+				dLogger.Printf("enableFastStorageAndCommitIfNotEnabled because no roots")
 				_, err := tree.enableFastStorageAndCommitIfNotEnabled()
 				return 0, err
 			}
@@ -614,6 +615,7 @@ func (tree *MutableTree) LoadVersion(targetVersion int64) (int64, error) {
 
 	if !tree.skipFastStorageUpgrade {
 		// Attempt to upgrade
+		dLogger.Printf("enableFastStorageAndCommitIfNotEnabled (default condition)")
 		if _, err := tree.enableFastStorageAndCommitIfNotEnabled(); err != nil {
 			return 0, err
 		}
@@ -689,6 +691,7 @@ func (tree *MutableTree) IsUpgradeable() (bool, error) {
 	if err != nil {
 		return false, err
 	}
+	dLogger.Printf("shouldForceFastStorageUpgrade %v, has upgraded %v", shouldForce, tree.ndb.hasUpgradedToFastStorage())
 	return !tree.skipFastStorageUpgrade && (!tree.ndb.hasUpgradedToFastStorage() || shouldForce), nil
 }
 
@@ -705,6 +708,7 @@ func (tree *MutableTree) enableFastStorageAndCommitIfNotEnabled() (bool, error) 
 	if !isUpgradeable {
 		return false, nil
 	}
+	dLogger.Printf("upgrading to fast storage")
 
 	// If there is a mismatch between which fast nodes are on disk and the live state due to temporary
 	// downgrade and subsequent re-upgrade, we cannot know for sure which fast nodes have been removed while downgraded,
